@@ -1,0 +1,77 @@
+
+
+For your reference, here is the dictionary-based LDA for use with the first sub-problem.
+
+import numpy as np
+import time;
+ 
+# this returns a number whose probability of occurence is p
+def sampleValue (p):
+        return np.flatnonzero (np.random.multinomial (1, p, 1))[0]
+ 
+# there are 2000 words in the corpus
+alpha = np.full (2000, .1)
+ 
+# there are 100 topics
+beta = np.full (100, .1)
+ 
+# this gets us the probabilty of each word happening in each of the 100 topics
+wordsInTopic = np.random.dirichlet (alpha, 100)
+# wordsInCorpus[i] will be a dictionary that gives us the number of each word in the document
+wordsInCorpus = {}
+ 
+# generate each doc
+for doc in range (0, 50):
+        #
+        # no words in this doc yet
+        wordsInDoc = {}
+        #
+        # get the topic probabilities for this doc
+        topicsInDoc = np.random.dirichlet (beta)
+        #
+        # generate each of the 2000 words in this document
+        for word in range (0, 2000):
+                #
+                # select the topci and the word
+                whichTopic = sampleValue (topicsInDoc)
+                whichWord = sampleValue (wordsInTopic[whichTopic])
+                #
+                # and record the word
+                wordsInDoc [whichWord] = wordsInDoc.get (whichWord, 0) + 1
+                #
+        # now, remember this document
+        wordsInCorpus [doc] = wordsInDoc
+
+
+
+And here is the array-based LDA for use with the second two.
+
+import numpy as np
+import time;
+ 
+# there are 2000 words in the corpus
+alpha = np.full (2000, .1)
+ 
+# there are 100 topics
+beta = np.full (100, .1)
+ 
+# this gets us the probabilty of each word happening in each of the 100 topics
+wordsInTopic = np.random.dirichlet (alpha, 100)
+ 
+# wordsInCorpus[i] will give us the vector of words in document i
+wordsInCorpus = np.zeros ((50, 2000))
+ 
+# generate each doc
+for doc in range (0, 50):
+        #
+        # get the topic probabilities for this doc
+        topicsInDoc = np.random.dirichlet (beta)
+        #
+        # assign each of the 2000 words in this doc to a topic
+        wordsToTopic = np.random.multinomial (2000, topicsInDoc)
+        #
+        # and generate each of the 2000 words
+        for topic in range (0, 100):
+                wordsFromCurrentTopic = np.random.multinomial (wordsToTopic[topic], wordsInTopic[topic])
+                wordsInCorpus[doc] = np.add (wordsInCorpus[doc], wordsFromCurrentTopic)
+ 
